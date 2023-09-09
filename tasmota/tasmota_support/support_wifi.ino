@@ -16,7 +16,6 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 /*********************************************************************************************\
  * Wifi
 \*********************************************************************************************/
@@ -39,7 +38,7 @@
 const uint8_t WIFI_CONFIG_SEC = 180;       // seconds before restart
 const uint8_t WIFI_CHECK_SEC = 20;         // seconds
 const uint8_t WIFI_RETRY_OFFSET_SEC = WIFI_RETRY_SECONDS;  // seconds
-
+uint8_t mac[6]={0x00,0x90,0x92,0x00,0x00,0x01}; // Custom Mac
 #include <ESP8266WiFi.h>                   // Wifi, MQTT, Ota, WifiManager
 #include "lwip/dns.h"
 #if ESP_IDF_VERSION_MAJOR >= 5
@@ -261,6 +260,8 @@ void WifiBegin(uint8_t flag, uint8_t channel) {
   } else {
     WiFi.begin(SettingsText(SET_STASSID1 + Settings->sta_active), SettingsText(SET_STAPWD1 + Settings->sta_active));
   }
+    wifi_set_macaddr(STATION_IF, &mac[0]);
+    wifi_set_macaddr(SOFTAP_IF, &mac[0]);
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_CONNECTING_TO_AP "%d %s%s " D_IN_MODE " 11%c " D_AS " %s..."),
     Settings->sta_active +1, SettingsText(SET_STASSID1 + Settings->sta_active), stemp, pgm_read_byte(&kWifiPhyMode[WiFi.getPhyMode() & 0x3]), TasmotaGlobal.hostname);
 
@@ -1090,7 +1091,6 @@ void WifiConnect(void)
   // https://github.com/arendst/Tasmota/issues/16061#issuecomment-1216970170
 //  sntp_servermode_dhcp(0);
 //#endif  // ESP8266
-
   WiFi.persistent(false);     // Solve possible wifi init errors
   Wifi.status = 0;
   Wifi.retry_init = WIFI_RETRY_OFFSET_SEC + (ESP_getChipId() & 0xF);  // Add extra delay to stop overrun by simultanous re-connects
